@@ -1,0 +1,81 @@
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Set up display
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Bouncy Ball by Robot")
+
+# Set up colors
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+
+# Set up ball properties
+ball_radius = 20
+ball_color = red
+ball_speed = [5, 5]
+
+# Set up robot properties
+robot_width, robot_height = 100, 20
+robot_color = white
+robot_speed = 10
+robot_x = (width - robot_width) // 2
+robot_y = height - robot_height - 10
+
+# Main game loop
+clock = pygame.time.Clock()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Move robot with arrow keys
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and robot_x > 0:
+        robot_x -= robot_speed
+    if keys[pygame.K_RIGHT] and robot_x < width - robot_width:
+        robot_x += robot_speed
+
+    # Move the ball
+    ball_speed[0] *= 1.001  # Acceleration over time
+    ball_speed[1] *= 1.001
+    ball_radius = int(ball_radius * 1.001)  # Increase ball size over time
+
+    if ball_speed[0] > 15:
+        ball_speed[0] = 15
+    if ball_speed[1] > 15:
+        ball_speed[1] = 15
+
+    ball_x += ball_speed[0]
+    ball_y += ball_speed[1]
+
+    # Bounce off walls
+    if ball_x - ball_radius <= 0 or ball_x + ball_radius >= width:
+        ball_speed[0] = -ball_speed[0]
+
+    if ball_y - ball_radius <= 0:
+        ball_speed[1] = -ball_speed[1]
+
+    # Bounce off the robot
+    if (
+        robot_x < ball_x < robot_x + robot_width
+        and robot_y < ball_y < robot_y + robot_height
+    ):
+        ball_speed[1] = -ball_speed[1]
+
+    # Draw everything
+    screen.fill(black)
+    pygame.draw.circle(screen, ball_color, (int(ball_x), int(ball_y)), ball_radius)
+    pygame.draw.rect(screen, robot_color, (robot_x, robot_y, robot_width, robot_height))
+
+    # Update display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(60)
